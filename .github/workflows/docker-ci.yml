@@ -20,15 +20,26 @@ jobs:
       - name: Start container
         run: docker run -d -p 8080:80 --name test-web docker-compose-lab-web
 
-      - name: Inspect container status
-        if: always()
-        run: docker ps -a
+      - name: Wait for Nginx to become ready
+        run: |
+          for i in $(seq 1 15); do
+            if docker exec test-web wget -qO- http://127.0.0.1/ > /dev/null; then
+              echo "Nginx is ready!"
+              exit 0
+            fi
+            echo "Waiting for Nginx... attempt $i of 15"
+            sleep 2
+          done
+          echo "Nginx did not become ready in time."
+          docker logs test-web
+          exit 1
 
-      - name: Test Nginx inside container
-        run: docker exec test-web wget -qO- http://127.0.0.1/
+      - name: Test website response
+        run: curl --fail --show-error http://127.0.0.1:8080/
 
-      - name: Test website from runner
-        run: curl --verbose --fail http://127.0.0.1:8080/
+      - name: Verify expected page content
+        run: |
+          curl --fail --silent http://127.0.0.1:8080/ | grep -q "Live updates with Docker bind mounts!"
 
       - name: Collect container logs
         if: always()

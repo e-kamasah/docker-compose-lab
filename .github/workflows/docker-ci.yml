@@ -20,6 +20,5 @@ jobs:
       - name: Start container
         run: docker run -d -p 8080:80 --name test-web docker-compose-lab-web
 
-        
       - name: Test website response
         run: curl --fail http://localhost:8080

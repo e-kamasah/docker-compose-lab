@@ -41,6 +41,18 @@ jobs:
         run: |
           curl --fail --silent http://127.0.0.1:8080/ | grep -q "Live updates with Docker bind mounts!"
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Tag Docker image
+        run: docker tag docker-compose-lab-web edwardkamasah/docker-compose-lab-web:latest
+
+      - name: Push image to Docker Hub
+        run: docker push edwardkamasah/docker-compose-lab-web:latest
+
       - name: Collect container logs
         if: always()
         run: docker logs test-web

@@ -20,5 +20,9 @@ jobs:
       - name: Start container
         run: docker run -d -p 8080:80 --name test-web docker-compose-lab-web
 
+      - name: Inspect container logs
+        if: always()
+        run: docker logs test-web
+
       - name: Test website response
-        run: curl --fail http://localhost:8080
+        run: curl --fail --retry 5 --retry-connrefused --retry-delay 2 http://localhost:8080
